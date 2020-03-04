@@ -2,14 +2,7 @@
 #include <string.h>
 #include "vector.h"
 /* define PRIVATE func. */
-size_t vector_byte_size(const Vector* vector);
-bool vector_is_initialized(const Vector* vector);
-int _vector_adjust_capacity(Vector* vector);
-void _vector_assign(Vector* vector, size_t index, void* element);
-void _vector_move_left(Vector* vector, size_t index);
-int _vector_move_right(Vector* vector, size_t index);
-void* _vector_offset(Vector* vector, size_t index);
-int _vector_reallocate(Vector* vector, size_t new_capacity);
+int vector_align(Vector* vector,size_t new_capacity);
 
 int vector_init(Vector* vector, size_t capacity, size_t element_size) {
 	if (vector == NULL) return VECTOR_ERROR;
@@ -23,7 +16,7 @@ int vector_init(Vector* vector, size_t capacity, size_t element_size) {
 }
 
 int vector_copy(Vector* destination, Vector* source) {
-	if (destination == NULL||source == NULL||vector_is_initialized(destination)||!vector_is_initialized(source)) return VECTOR_ERROR;
+	if (destination == NULL||source == NULL||destination->data != NULL||!(source->data != NULL)) return VECTOR_ERROR;
 
 	/* Copy ALL the data */
 	destination->size = source->size;
@@ -33,16 +26,21 @@ int vector_copy(Vector* destination, Vector* source) {
 	destination->data = malloc(destination->capacity * source->element_size);
 	if (destination->data == NULL) return VECTOR_ERROR;
 
-	memcpy(destination->data, source->data, vector_byte_size(source));
+	memcpy(destination->data, source->data, vector_size(source)*source->size);
 
 	return VECTOR_SUCCESS;
 }
 
 /* Insertion */
 int vector_push_back(Vector* vector, void* element) {
-	if (vector->size == vector->capacity&& _vector_adjust_capacity(vector) == VECTOR_ERROR) return VECTOR_ERROR;
-
-	_vector_assign(vector, vector->size, element);
+	int index;
+	void* offset;
+	if (vector->size == vector->capacity&& vector_align(vector,MAX(1, vector->size * VECTOR_GROWTH_FACTOR)) == VECTOR_ERROR) 
+		return VECTOR_ERROR;
+	
+	index=vector->size;
+    offset = (char*)vector->data + (index * vector->element_size);
+	memcpy(offset, element, vector->element_size);
 	++vector->size;
 
 	return VECTOR_SUCCESS;
@@ -54,13 +52,19 @@ int vector_push_front(Vector* vector, void* element) {
 
 int vector_insert(Vector* vector, size_t index, void* element) {
 	void* offset;
+	size_t elements_bit;
 
 	if (vector == NULL||element == NULL||vector->element_size == 0||index > vector->size) return VECTOR_ERROR;
 
-	if ((vector->size == vector->capacity&&_vector_adjust_capacity(vector) == VECTOR_ERROR)||_vector_move_right(vector, index) == VECTOR_ERROR) return VECTOR_ERROR;
+	if ((vector->size == vector->capacity&&vector_align(vector,MAX(1, vector->size * VECTOR_GROWTH_FACTOR)) == VECTOR_ERROR)) return VECTOR_ERROR;
 
-	/* Insert the element */
-	offset = _vector_offset(vector, index);
+	/* move right. */
+	offset = (char*)vector->data + (index * vector->element_size);
+	elements_bit = (vector->size - index) * vector->element_size;
+	memmove((char*)offset + vector->element_size, offset, elements_bit);
+
+	/* insert the element */
+	offset = (char*)vector->data + (index * vector->element_size);
 	memcpy(offset, element, vector->element_size);
 	++vector->size;
 
@@ -68,9 +72,12 @@ int vector_insert(Vector* vector, size_t index, void* element) {
 }
 
 int vector_assign(Vector* vector, size_t index, void* element) {
+	void* offset;
+
     if (vector == NULL||element == NULL||vector->element_size == 0||index > vector->size) return VECTOR_ERROR;
 
-	_vector_assign(vector, index, element);
+	offset = (char*)vector->data + (index * vector->element_size);
+	memcpy(offset, element, vector->element_size);
 
 	return VECTOR_SUCCESS;
 }
@@ -82,7 +89,7 @@ int vector_pop_back(Vector* vector) {
 
 	--vector->size;
 
-	if (vector->size == vector->capacity * VECTOR_MINIMUM_CAPACITY) 	_vector_adjust_capacity(vector);
+	if (vector->size == vector->capacity * VECTOR_MINIMUM_CAPACITY) 	vector_align(vector,MAX(1, vector->size * VECTOR_GROWTH_FACTOR));
 
 	return VECTOR_SUCCESS;
 }
@@ -92,15 +99,17 @@ int vector_pop_front(Vector* vector) {
 }
 
 int vector_erase(Vector* vector, size_t index) {
-	if (vector == NULL) return VECTOR_ERROR;
-	if (vector->element_size == 0) return VECTOR_ERROR;
-	if (index >= vector->size) return VECTOR_ERROR;
+	size_t right;
+	void* offset;
+	if (vector == NULL||vector->element_size == 0||index >= vector->size) return VECTOR_ERROR;
 
-	/* Just overwrite */
-	_vector_move_left(vector, index);
+	offset = (char*)vector->data + (index * vector->element_size);
+	right = (vector->size - index - 1) * vector->element_size;
+
+	memmove(offset, (char*)offset + vector->element_size, right);
 
 	if (--vector->size == vector->capacity / 4) {
-		_vector_adjust_capacity(vector);
+		vector_align(vector,MAX(1, vector->size * VECTOR_GROWTH_FACTOR));
 	}
 
 	return VECTOR_SUCCESS;
@@ -114,7 +123,7 @@ int vector_clear(Vector* vector) {
 void* vector_get(Vector* vector, size_t index) {
 	if (vector == NULL||vector->element_size == 0||index >= vector->size) return NULL;
 
-	return _vector_offset(vector, index);
+	return (char*)vector->data + (index * vector->element_size);
 }
 
 
@@ -127,14 +136,6 @@ void* vector_back(Vector* vector) {
 }
 
 /* Information */
-bool vector_is_initialized(const Vector* vector) {
-	return vector->data != NULL;
-}
-
-size_t vector_byte_size(const Vector* vector) {
-	return vector->size * vector->element_size;
-}
-
 size_t vector_size(const Vector* vector){
 	return vector->size;
 }
@@ -147,11 +148,11 @@ bool vector_is_empty(const Vector* vector) {
 int vector_resize(Vector* vector, size_t new_size) {
 	if (new_size <= vector->capacity * VECTOR_MINIMUM_CAPACITY) {
 		vector->size = new_size;
-		if (_vector_reallocate(vector, new_size * VECTOR_GROWTH_FACTOR) == -1) {
+		if (vector_align(vector, new_size * VECTOR_GROWTH_FACTOR) == -1) {
 			return VECTOR_ERROR;
 		}
 	} else if (new_size > vector->capacity) {
-		if (_vector_reallocate(vector, new_size * VECTOR_GROWTH_FACTOR) == -1) {
+		if (vector_align(vector, new_size * VECTOR_GROWTH_FACTOR) == -1) {
 			return VECTOR_ERROR;
 		}
 	}
@@ -185,7 +186,7 @@ Iterator vector_iterator(Vector* vector, size_t index) {
 	if (index > vector->size) return iterator;
 	if (vector->element_size == 0) return iterator;
 
-	iterator.pointer = _vector_offset(vector, index);
+	iterator.pointer = (char*)vector->data + (index * vector->element_size);
 	iterator.element_size = vector->element_size;
 
 	return iterator;
@@ -203,76 +204,37 @@ void iterator_decrement(Iterator* iterator) {
     iterator->pointer = (char*)iterator->pointer - iterator->element_size;
 }
 
-void* iterator_next(Iterator* iterator) {
-	void* current = iterator->pointer;
-	iterator_increment(iterator);
-
-	return current;
-}
-
 bool iterator_equals(Iterator* first, Iterator* second) {
 	return first->pointer == second->pointer;
 }
 
 /* Sort */
 void vector_sort(Vector *vector, vector_less_func *less){
-	int i=0;
-	int size=vector->size;
-	while(i<size-1){
-		int k=0;
-		while(k<size-i-1){
-			if(less(vector_get(vector,k),vector_get(vector,k+1))){
-				int *t=vector_get(vector,k+1);
-				int a=*t;
-				vector_assign(vector,k+1,vector_get(vector,k));
-				vector_assign(vector,k,&a);
+	int vector_outer_sort;
+	int size;
+	
+	size=vector->size;
+
+	vector_outer_sort = 0;
+	while(vector_outer_sort<size-1){
+		int vector_inner_sort=0;
+		while(vector_inner_sort<size-vector_outer_sort-1){
+			if(less(vector_get(vector,vector_inner_sort),vector_get(vector,vector_inner_sort+1))){
+				int *temp;
+				int temp_number;
+				temp=vector_get(vector,vector_inner_sort+1);
+				temp_number = *temp;
+				vector_assign(vector,vector_inner_sort+1,vector_get(vector,vector_inner_sort));
+				vector_assign(vector,vector_inner_sort,&temp_number);
 			}
-			k++;
+			++vector_inner_sort;
 		}
-		i++;
+		++vector_outer_sort;
 	}
 }
 
-/* private */
-void* _vector_offset(Vector* vector, size_t index) {
-	return (char*)vector->data + (index * vector->element_size);
-}
-
-void _vector_assign(Vector* vector, size_t index, void* element) {
-	void* offset = _vector_offset(vector, index);
-	memcpy(offset, element, vector->element_size);
-}
-
-int _vector_move_right(Vector* vector, size_t index) {
-	/* The location where to start to move from. */
-	void* offset = _vector_offset(vector, index);
-
-	/* How many to move to the right. */
-	size_t elements_in_bytes = (vector->size - index) * vector->element_size;
-
-	memmove((char*)offset + vector->element_size, offset, elements_in_bytes);
-	return VECTOR_SUCCESS;
-}
-
-void _vector_move_left(Vector* vector, size_t index) {
-	size_t right_elements_in_bytes;
-	void* offset;
-
-	/* The offset into the memory */
-	offset = _vector_offset(vector, index);
-
-	/* How many to move to the left */
-	right_elements_in_bytes = (vector->size - index - 1) * vector->element_size;
-
-	memmove(offset, (char*)offset + vector->element_size, right_elements_in_bytes);
-}
-
-int _vector_adjust_capacity(Vector* vector) {
-	return _vector_reallocate(vector,MAX(1, vector->size * VECTOR_GROWTH_FACTOR));
-}
-
-int _vector_reallocate(Vector* vector, size_t new_capacity) {
-	size_t new_capacity_in_bytes;
+/* Private */
+int vector_align(Vector* vector,size_t new_capacity) {
 	void* old;
 
 	if (new_capacity < VECTOR_MINIMUM_CAPACITY) {
@@ -283,18 +245,13 @@ int _vector_reallocate(Vector* vector, size_t new_capacity) {
 		}
 	}
 
-	new_capacity_in_bytes = new_capacity * vector->element_size;
+	new_capacity *= vector->element_size;
 	old = vector->data;
 
-	if ((vector->data = malloc(new_capacity_in_bytes)) == NULL) {
-		return VECTOR_ERROR;
-	}
+	if ((vector->data = malloc(new_capacity)) == NULL) return VECTOR_ERROR;
 
-	memcpy(vector->data, old, vector_byte_size(vector));
-
-
-	vector->capacity = new_capacity;
-
+	memcpy(vector->data, old, vector_size(vector)*vector->element_size);
+	vector->capacity = new_capacity/vector->element_size;
 	free(old);
 
 	return VECTOR_SUCCESS;
