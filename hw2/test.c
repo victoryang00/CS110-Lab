@@ -7,7 +7,7 @@ int main(int argc, const char* argv[]) {
     int i;
 
     printf("TESTING SETUP ...\n");
-    Vector vector = VECTOR_INITIALIZER;
+    Vector vector = {1,1,1,NULL};
     assert(!vector_is_initialized(&vector));
     vector_init(&vector, 0, sizeof(int));
     assert(vector_is_initialized(&vector));
@@ -44,21 +44,7 @@ int main(int argc, const char* argv[]) {
 
     printf("TESTING ITERATION ...\n");
 
-    Iterator iterator = vector_begin(&vector);
-    assert(iterator_index(&vector, &iterator) == 0);
 
-    iterator = vector_iterator(&vector, 1);
-    assert(iterator_index(&vector, &iterator) == 1);
-
-    while(iterator_index(&vector,&iterator)<vector.size-1){
-        assert(ITERATOR_GET_AS(int, &iterator) == 666);
-        iterator_increment(&iterator);
-    }
-
-    printf("TESTING REMOVAL ...\n");
-
-    iterator = vector_begin(&vector);
-    assert(iterator_erase(&vector, &iterator) == VECTOR_SUCCESS);
 
     printf("TESTING RESIZE ...\n");
     assert(vector_resize(&vector, 100) == VECTOR_SUCCESS);
@@ -66,13 +52,6 @@ int main(int argc, const char* argv[]) {
     assert(vector.capacity > 100);
 
 
-
-    printf("TESTING CLEAR ...\n");
-    assert(vector_clear(&vector) == VECTOR_SUCCESS);
-
-    assert(vector.size == 0);
-    assert(vector_is_empty(&vector));
-    assert(vector.capacity == VECTOR_MINIMUM_CAPACITY);
 
     vector_destroy(&vector);
 

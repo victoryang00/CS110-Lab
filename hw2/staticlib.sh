@@ -1,3 +1,3 @@
-gcc -c vector.c
+gcc -c vector.c -Wpedantic -Wall -Wextra -Werror -std=c89
 ar crv libvector.a vector.c
-gcc -o staticvector test.c -L./ -lvector
+gcc -o staticvector test.c -L./ -lvector -Wpedantic -Wall -Wextra -Werror -std=c89

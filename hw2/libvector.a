@@ -1,8 +1,17 @@
 !<arch>
-vector.c/       0           0     0     644     7856      `
+vector.c/       0           0     0     644     7898      `
 #include <stdlib.h>
 #include <string.h>
 #include "vector.h"
+/* define PRIVATE func. */
+size_t vector_byte_size(const Vector* vector);
+bool vector_is_initialized(const Vector* vector);
+int _vector_adjust_capacity(Vector* vector);
+void _vector_assign(Vector* vector, size_t index, void* element);
+void _vector_move_left(Vector* vector, size_t index);
+int _vector_move_right(Vector* vector, size_t index);
+void* _vector_offset(Vector* vector, size_t index);
+int _vector_reallocate(Vector* vector, size_t new_capacity);
 
 int vector_init(Vector* vector, size_t capacity, size_t element_size) {
 	if (vector == NULL) return VECTOR_ERROR;
@@ -205,22 +214,6 @@ void* iterator_next(Iterator* iterator) {
 
 bool iterator_equals(Iterator* first, Iterator* second) {
 	return first->pointer == second->pointer;
-}
-
-int iterator_erase(Vector* vector, Iterator* iterator) {
-    size_t index = iterator_index(vector, iterator);
-
-    if (vector_erase(vector, index) == VECTOR_ERROR) {
-        return VECTOR_ERROR;
-    }
-
-    *iterator = vector_iterator(vector, index);
-
-    return VECTOR_SUCCESS;
-}
-
-size_t iterator_index(Vector* vector, Iterator* iterator) {
-    return (iterator->pointer - vector->data) / vector->element_size;
 }
 
 /* Sort */

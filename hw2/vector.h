@@ -25,8 +25,7 @@
 
 /* Please use `vector->data != VECTOR_UNINITIALIZED' to check if the vector is initialized */
 #define VECTOR_UNINITIALIZED 		NULL
-#define VECTOR_INITIALIZER \
-	{ 0, 0, 0, VECTOR_UNINITIALIZED }
+
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
@@ -125,15 +124,5 @@ typedef bool vector_less_func(const void *a, const void *b);
 	 or quick sort.	 There is no strict time or space limit. */
 void vector_sort(Vector *vector, vector_less_func *less);
 
-/* define PRIVATE func. */
-size_t vector_byte_size(const Vector* vector);
-bool vector_is_initialized(const Vector* vector);
-int _vector_adjust_capacity(Vector* vector);
-void _vector_assign(Vector* vector, size_t index, void* element);
-void _vector_move_left(Vector* vector, size_t index);
-int _vector_move_right(Vector* vector, size_t index);
-void* _vector_offset(Vector* vector, size_t index);
-int _vector_reallocate(Vector* vector, size_t new_capacity);
-size_t iterator_index(Vector* vector, Iterator* iterator);
-int iterator_erase(Vector* vector, Iterator* iterator);
+
 #endif /* VECTOR_H */
