@@ -1,6 +1,6 @@
 
 
-
+# task2
 ```bash
  yiweiyang  (e) base  ~  Downloads  lab2  1  sudo gdb hello
 GNU gdb (GDB) 8.3
@@ -279,4 +279,66 @@ Starting program: /Users/yiweiyang/Downloads/lab2/hello
 [New Thread 0x1703 of process 5774]
 warning: unhandled dyld version (16)
 [2]  + 5709 suspended (tty output)  sudo gdb hello
+```
+# task3
+```bash
+==8265== Memcheck, a memory error detector
+==8265== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8265== Using Valgrind-3.16.0.GIT and LibVEX; rerun with -h for copyright info
+==8265== Command: ./vector-test
+==8265== 
+--8265-- UNKNOWN fcntl 101!
+--8265-- UNKNOWN fcntl 101! (repeated 2 times)
+--8265-- UNKNOWN fcntl 101! (repeated 4 times)
+--8265-- UNKNOWN fcntl 101! (repeated 8 times)
+--8265-- UNKNOWN fcntl 101! (repeated 16 times)
+--8265-- UNKNOWN fcntl 101! (repeated 32 times)
+==8265== valgrind: Unrecognised instruction at address 0x10062d7bd.
+==8265==    at 0x10062D7BD: __pthread_init.cold.2 (in /usr/lib/system/libsystem_pthread.dylib)
+==8265==    by 0x10011C72D: libSystem_initializer (in /usr/lib/libSystem.B.dylib)
+==8265==    by 0x10001F15C: ImageLoaderMachO::doModInitFunctions(ImageLoader::LinkContext const&) (in /usr/lib/dyld)
+==8265==    by 0x10001F581: ImageLoaderMachO::doInitialization(ImageLoader::LinkContext const&) (in /usr/lib/dyld)
+==8265==    by 0x100019DC6: ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&, unsigned int, char const*, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100019D31: ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&, unsigned int, char const*, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100017E57: ImageLoader::processInitializers(ImageLoader::LinkContext const&, unsigned int, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100017EF7: ImageLoader::runInitializers(ImageLoader::LinkContext const&, ImageLoader::InitializerTimingList&) (in /usr/lib/dyld)
+==8265==    by 0x10000666A: dyld::initializeMainExecutable() (in /usr/lib/dyld)
+==8265==    by 0x10000BCCF: dyld::_main(macho_header const*, unsigned long, int, char const**, char const**, char const**, unsigned long*) (in /usr/lib/dyld)
+==8265==    by 0x100005226: dyldbootstrap::start(dyld3::MachOLoaded const*, int, char const**, dyld3::MachOLoaded const*, unsigned long*) (in /usr/lib/dyld)
+==8265==    by 0x100005024: _dyld_start (in /usr/lib/dyld)
+==8265== Your program just tried to execute an instruction that Valgrind
+==8265== did not recognise.  There are two possible reasons for this.
+==8265== 1. Your program has a bug and erroneously jumped to a non-code
+==8265==    location.  If you are running Memcheck and you just saw a
+==8265==    warning about a bad jump, it's probably your program's fault.
+==8265== 2. The instruction is legitimate but Valgrind doesn't handle it,
+==8265==    i.e. it's Valgrind's fault.  If you think this is the case or
+==8265==    you are not sure, please let us know and we'll try to fix it.
+==8265== Either way, Valgrind will now raise a SIGILL signal which will
+==8265== probably kill your program.
+==8265== 
+==8265== Process terminating with default action of signal 4 (SIGILL)
+==8265==  Illegal opcode at address 0x10062D7BD
+==8265==    at 0x10062D7BD: __pthread_init.cold.2 (in /usr/lib/system/libsystem_pthread.dylib)
+==8265==    by 0x10011C72D: libSystem_initializer (in /usr/lib/libSystem.B.dylib)
+==8265==    by 0x10001F15C: ImageLoaderMachO::doModInitFunctions(ImageLoader::LinkContext const&) (in /usr/lib/dyld)
+==8265==    by 0x10001F581: ImageLoaderMachO::doInitialization(ImageLoader::LinkContext const&) (in /usr/lib/dyld)
+==8265==    by 0x100019DC6: ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&, unsigned int, char const*, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100019D31: ImageLoader::recursiveInitialization(ImageLoader::LinkContext const&, unsigned int, char const*, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100017E57: ImageLoader::processInitializers(ImageLoader::LinkContext const&, unsigned int, ImageLoader::InitializerTimingList&, ImageLoader::UninitedUpwards&) (in /usr/lib/dyld)
+==8265==    by 0x100017EF7: ImageLoader::runInitializers(ImageLoader::LinkContext const&, ImageLoader::InitializerTimingList&) (in /usr/lib/dyld)
+==8265==    by 0x10000666A: dyld::initializeMainExecutable() (in /usr/lib/dyld)
+==8265==    by 0x10000BCCF: dyld::_main(macho_header const*, unsigned long, int, char const**, char const**, char const**, unsigned long*) (in /usr/lib/dyld)
+==8265==    by 0x100005226: dyldbootstrap::start(dyld3::MachOLoaded const*, int, char const**, dyld3::MachOLoaded const*, unsigned long*) (in /usr/lib/dyld)
+==8265==    by 0x100005024: _dyld_start (in /usr/lib/dyld)
+==8265== 
+==8265== HEAP SUMMARY:
+==8265==     in use at exit: 0 bytes in 0 blocks
+==8265==   total heap usage: 0 allocs, 0 frees, 0 bytes allocated
+==8265== 
+==8265== All heap blocks were freed -- no leaks are possible
+==8265== 
+==8265== For lists of detected and suppressed errors, rerun with: -s
+==8265== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 1 from 1)
+[3]    8265 illegal hardware instruction  valgrind --tool=memcheck --leak-check=full --track-origins=yes --dsymutil=yes
 ```
