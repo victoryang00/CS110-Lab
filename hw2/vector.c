@@ -46,9 +46,10 @@ int vector_copy(Vector *destination, Vector *source)
 /* Insertion */
 int vector_push_back(Vector *vector, void *element)
 {
-	if(vector == NULL||element==NULL)return VECTOR_ERROR;
+	/* define index. */
     int index;
     void *offset;
+	if(vector == NULL||element==NULL)return VECTOR_ERROR;
     /* check whether vector is NULL. */
     if (vector->size == vector->capacity &&
         vector_align(vector, MAX(1, vector->size * VECTOR_GROWTH_FACTOR)) ==
@@ -68,6 +69,10 @@ int vector_push_back(Vector *vector, void *element)
 
 int vector_push_front(Vector *vector, void *element)
 {
+
+	/*check nullable*/
+	if (vector == NULL)
+        return VECTOR_ERROR;
     /* return. */
     return vector_insert(vector, 0, element);
 }
@@ -129,7 +134,11 @@ int vector_pop_back(Vector *vector)
 }
 
 int vector_pop_front(Vector *vector)
-{ /* pop front==erase. */
+{ 
+	/*check nullable*/
+	if (vector == NULL)
+        return VECTOR_ERROR;
+	/* pop front==erase. */
     return vector_erase(vector, 0);
 }
 
@@ -160,8 +169,8 @@ int vector_clear(Vector *vector) {
 	/* check nullable  */
 	if (vector == NULL)
         return VECTOR_ERROR;
-		/* return size */
-		 return vector_resize(vector, 0); }
+	/* return size */
+	return vector_resize(vector, 0); }
 
 /* Lookup */
 void *vector_get(Vector *vector, size_t index)
@@ -173,10 +182,19 @@ void *vector_get(Vector *vector, size_t index)
     return (char *)vector->data + (index * vector->element_size);
 }
 
-void *vector_front(Vector *vector) { return vector_get(vector, 0); }
+void *vector_front(Vector *vector) { 
+	/*check nullable*/
+	if (vector == NULL)
+        return NULL;
+	/*return the index 0 */
+	return vector_get(vector, 0); }
 
 void *vector_back(Vector *vector)
 {
+	/*check nullable*/
+	if (vector == NULL)
+        return NULL;
+	/*return the index -1 */
     return vector_get(vector, vector->size - 1);
 }
 
@@ -223,13 +241,14 @@ int vector_destroy(Vector *vector)
 
 /* Iterators */
 Iterator vector_begin(Vector *vector)
-{ /* iterator implement */
+{
+	/* iterator implement */
     return vector_iterator(vector, 0);
 }
 
 Iterator vector_end(Vector *vector)
 {
-    /* iterator implement */
+	/* iterator implement */
     return vector_iterator(vector, vector->size);
 }
 
@@ -276,6 +295,9 @@ void vector_sort(Vector *vector, vector_less_func *less)
 {
     int vector_outer_sort;
     int size;
+	/* check nullable. */
+	if (vector == NULL)
+        return;
     /* get size */
     size = vector->size;
     /* bubble sort */
@@ -309,6 +331,9 @@ void vector_sort(Vector *vector, vector_less_func *less)
 int vector_align(Vector *vector, size_t new_capacity)
 {
     void *old;
+	/*check nullable*/
+	if (vector == NULL)
+        return VECTOR_ERROR;
     /* check whether vector is NULL. */
     if (new_capacity < VECTOR_MINIMUM_CAPACITY) {
         /* check whether is bigger than minimun capacity. */
