@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "vector.h": "c",
-        "assert.h": "c",
-        "stdlib.h": "c",
-        "string.h": "c",
-        "type_traits": "c"
-    }
-}
