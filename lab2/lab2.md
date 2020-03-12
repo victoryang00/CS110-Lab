@@ -1,6 +1,19 @@
-
-
 # task2
+```
+1.  r [args]
+2.  b [sth] if [cond]
+3.  n
+4.  s
+5.  c
+6.  p [expr]
+7.  def 7
+    > s
+    > p [expr]
+    > end
+8.  i lo
+9.  q
+```
+
 ```bash
  yiweiyang  (e) base  ~  Downloads  lab2  1  sudo gdb hello
 GNU gdb (GDB) 8.3
@@ -341,4 +354,13 @@ warning: unhandled dyld version (16)
 ==8265== For lists of detected and suppressed errors, rerun with: -s
 ==8265== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 1 from 1)
 [3]    8265 illegal hardware instruction  valgrind --tool=memcheck --leak-check=full --track-origins=yes --dsymutil=yes
+```
+
+
+# task3
+```
+bad_vector_new:
+  v is a local variable in stack, illegal to access when current action record is destroyed with unpredictable consequence.
+also_bad_vector_new:
+  v is a local variable in stack, illegal to access when current action record is destroyed with unpredictable consequence.
 ```

@@ -5,7 +5,7 @@
 unsigned
 get_bit (unsigned x, unsigned n)
 {
-    return 1 == ((x>>n)&1);
+    return (x>>n)&1;
 }
 
 /* Set the nth bit of the value of x to v.
