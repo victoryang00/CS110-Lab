@@ -21,3 +21,6 @@ two sw determines the hit rate
 hit rate 0.75
 step size = 2
 
+# test of transpose
+
+![image-20200420105146187](image-20200420105146187.png)
