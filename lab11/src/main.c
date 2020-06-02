@@ -34,6 +34,24 @@ int Get_Button(int ch) {
 
 int Get_BOOT0(void) { return (int)(gpio_input_bit_get(GPIOA, GPIO_PIN_8)); }
 
+int rand() {
+    static unsigned long reg = 123; /*reg must be unsigned so right
+                                       shift works properly.*/
+    /*reg should be initialized with some random value.*/
+    reg = ((((reg >> 31) /*Shift the 32nd bit to the first
+                                     bit*/
+             ^ (reg >> 6) /*XOR it with the seventh bit*/
+             ^ (reg >> 4) /*XOR it with the fifth bit*/
+             ^ (reg >> 2) /*XOR it with the third bit*/
+             ^ (reg >> 1) /*XOR it with the second bit*/
+             ^ reg) /*and XOR it with the first bit.*/
+            & 0x0000001) /*Strip all the other bits off and*/
+           << 31) /*move it back to the 32nd bit.*/
+          | (reg >> 1); /*Or with the reg shifted
+                               right.*/
+    return reg; /*Return the first bit.*/
+}
+
 int main(void) {
     IO_init(); // init OLED
     LCD_Clear(BLACK);
@@ -45,7 +63,7 @@ int main(void) {
     LCD_ShowString(0, 48, (u8 *)("Hello World4!"), GBLUE);
     LCD_ShowString(0, 64, (u8 *)("Hello World5!"), RED);
 
-    int i = 0;
+    int r = 0, g = 0, b = 0, p = 3, x = 80, y = 40;
     while (1) {
         while (!Get_BOOT0()) {
             delay_1ms(50);
@@ -53,7 +71,12 @@ int main(void) {
         }
 
         // LCD_Clear(BLACK);
-        draw(i);
-        i += 10;
+        draw(x, y, p, (r << 11) + (g << 5) + b);
+        p = (p + ((rand() & 0x3fffffff)%3 - 1) + 20) % 20 + 1;
+        r = (r + ((rand() & 0x3fffffff)%3 - 1)) & 0b11111;
+        g = (g + ((rand() & 0x3fffffff)%3 - 1)) & 0b111111;
+        b = (b + ((rand() & 0x3fffffff)%3 - 1)) & 0b11111;
+        x = (x + ((rand() & 0x3fffffff)%3 - 1) + 160) % 160;
+        y = (y + ((rand() & 0x3fffffff)%3 - 1) + 80) % 80;
     }
 }
