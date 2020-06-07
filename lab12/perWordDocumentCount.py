@@ -26,14 +26,14 @@ def mapFunc(arg):
     Create `(key, value)` pairs.
     You may need to modify this code.
     """
-    return (arg, arg)
+    return (arg, 1)
 
 def reduceFunc(arg1, arg2):
     """
     Sum counts.
     You may need to modify this code.
     """
-    return str(arg1) + " " + str( arg2)
+    return arg1+ arg2
 
 def perWordDocumentCount(file_name, output="spark-wc-out-perWordDocumentCount"):
     sc = SparkContext("local[8]", "PerWordDocumentCount", conf=SparkConf().set("spark.hadoop.validateOutputSpecs", "false"))
