@@ -7,18 +7,17 @@ def flatMapFunc(document):
     """
     document[0] is the document ID (distinct for each document)
     document[1] is a string of all text in that document
-
     You will need to modify this code.
     """
     documentID = document[0]
     words = re.findall(r"\w+", document[1])
-    return words
+    return [(word, documentID,i) for i,word in enumerate(words)]
 
 def mapFunc(arg):
     """
     You may need to modify this code.
     """
-    return (arg, 1)
+    return ((arg[0],arg[1]), [arg[2]])
 
 def reduceFunc(arg1, arg2):
     """
@@ -32,7 +31,8 @@ def createIndices(file_name, output="spark-wc-out-createIndices"):
 
     indices = file.flatMap(flatMapFunc) \
                  .map(mapFunc) \
-                 .reduceByKey(reduceFunc)
+                 .reduceByKey(reduceFunc)\
+                 .sortByKey()
 
     indices.coalesce(1).saveAsTextFile(output)
 

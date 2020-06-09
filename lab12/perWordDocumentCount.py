@@ -26,7 +26,7 @@ def mapFunc(arg):
     Create `(key, value)` pairs.
     You may need to modify this code.
     """
-    return (arg, 1)
+    return (arg[0], 1)
 
 def reduceFunc(arg1, arg2):
     """

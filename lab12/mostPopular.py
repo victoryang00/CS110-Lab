@@ -9,6 +9,8 @@ def splitDocument(document):
 
 def toPairs(word):
     """ Creates `(key, value)` pairs where the word is the key and 1 is the value """
+    if word in["the","a","an"]:
+        return (word,0)
     return (word, 1)
 
 def sumCounts(a, b):
@@ -19,6 +21,10 @@ def sumCounts(a, b):
     Note that Map/flatMap style functions take in one argument while Reduce functions take in two
 """
 
+def sb(a,b):
+    return a+b
+
+
 def mostPopular(file_name, output="spark-wc-out-mostPopular"):
     sc = SparkContext("local[8]", "WordCount", conf=SparkConf().set("spark.hadoop.validateOutputSpecs", "false"))
     """ Reads in a sequence file FILE_NAME to be manipulated """
@@ -28,6 +34,7 @@ def mostPopular(file_name, output="spark-wc-out-mostPopular"):
                  .map(toPairs) \
                  .reduceByKey(sumCounts) \
                  .sortBy(lambda (word, count): -count)
+                # .reduce(sb)
 
 
     """ Takes the dataset stored in counts and writes everything out to OUTPUT """
