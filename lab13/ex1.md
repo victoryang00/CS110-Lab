@@ -1,3 +1,16 @@
+## 1
+Size=2^8=256
+
+
+## 2
+TLB Hits: 5, TLB Misses: 5, Page Hits: 0, Page Faults: 5
+
+## 3
+The simulator assumes that the number of TLB's entries is the same as number of pages in physical memory. So if TLB misses, the data is definitely not in physical memory, and therefore not in Page Table.
+
+So it's impossible to think of a set of ten addresses that would result in Page Hit.
+
+## 4
 access 9E
 	100-page#4 11110-offset
 	TLB search for page#4  --  TLB miss
@@ -27,9 +40,9 @@ access B3
 	PT row5, frame number 3. valid bit 1
 	TLB VPN 5 PPN 3
 
---------------------------------------------------------------
+
 TLB full, physical memory frame full 
---------------------------------------------------------------
+
 
 access 96
 	100--page4 10110--offset22
